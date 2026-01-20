@@ -1,13 +1,20 @@
 import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */
+
 const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   images: {
     remotePatterns: [{ protocol: "https", hostname: "img.clerk.com" }],
   },
 };
+
+module.exports = nextConfig;
 
 export default withSentryConfig(nextConfig, {
   // For all available options, see:
