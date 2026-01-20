@@ -1,10 +1,11 @@
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const Header = ({ children }: HeaderProps) => {
+const Header = ({ children, className }: HeaderProps) => {
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b">
+    <div className={cn("header", className)}>
       <Link href="/" className="flex items-center">
         <Image
           src="/assets/icons/logo.svg"

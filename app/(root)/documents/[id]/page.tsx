@@ -1,5 +1,8 @@
+import CollaborativeRoom from "@/components/collaborativeRoom";
 import { Editor } from "@/components/editor/Editor";
 import Header from "@/components/header";
+import { getDocument } from "@/lib/actions/room.actions";
+import { getClerksUser } from "@/lib/actions/user.actions";
 import {
   SignInButton,
   SignUpButton,
@@ -7,31 +10,41 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import React from "react";
 
-const Document = () => {
+const Document = async ({ params: { id } }: SearchParamProps) => {
+  const clerkUser = await currentUser();
+  if (!clerkUser) redirect("/sign-in");
+  const room = await getDocument({
+    roomId: id,
+    userId: clerkUser.emailAddresses[0].emailAddress,
+  });
+  if (!room) redirect("/");
+  const userIds = Object.keys(room.usersAccesses);
+  const users = await getClerksUser({ userIds });
+  const usersData = users.map((user: User) => ({
+    ...user,
+    userType: room.usersAccesses[user?.email]?.includes("room:write")
+      ? "editor"
+      : "viewer",
+  }));
+  const currentUserType = room.usersAccesses[
+    clerkUser.emailAddresses[0].emailAddress
+  ]?.includes("room:write")
+    ? "editor"
+    : "viewer";
+
   return (
-    <div>
-      <Header>
-        <div className="flex w-fit items-center justify-center gap-2">
-          <p className="document-title">Share</p>
-        </div>
-        <div className="flex gap-2">
-          <SignedOut>
-            <SignInButton />
-            <SignUpButton>
-              <button className="bg-[#6c47ff] text-ceramic-white rounded-full font-medium text-sm sm:text-base h-8 sm:h-12 px-4 sm:px-5 cursor-pointer">
-                Sign Up
-              </button>
-            </SignUpButton>
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-        </div>
-      </Header>
-      <Editor />
-    </div>
+    <main className="flex w-full flex-col item -center">
+      <CollaborativeRoom
+        roomId={id}
+        roomMetadata={room.metadata}
+        users={usersData}
+        currentUserType={currentUserType}
+      />
+    </main>
   );
 };
 
