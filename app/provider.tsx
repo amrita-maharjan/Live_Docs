@@ -12,11 +12,6 @@ import { useUser } from "@clerk/nextjs";
 const Provider = ({ children }: { children: ReactNode }) => {
   const { user: clerkUser, isLoaded } = useUser();
 
-  // ⛔ Do not render Liveblocks until Clerk is ready
-  if (!isLoaded) {
-    return <Loader />;
-  }
-
   const resolveUsers = useMemo(
     () =>
       async ({ userIds }: { userIds: string[] }) => {
@@ -36,6 +31,11 @@ const Provider = ({ children }: { children: ReactNode }) => {
       },
     [clerkUser]
   );
+
+  // ⛔ Do not render Liveblocks until Clerk is ready
+  if (!isLoaded) {
+    return <Loader />;
+  }
 
   return (
     <LiveblocksProvider
